@@ -1,0 +1,5 @@
+- name: Update FRR prefix-lists from bgpq4 (run locally)
+  hosts: localhost
+  become: true
+  roles:
+    - update_frr

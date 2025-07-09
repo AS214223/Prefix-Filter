@@ -1,0 +1,39 @@
+- name: Generate IPv4 prefix list using bgpq4
+  command: bgpq4 -Al FPNET4 -s AS214223 -4 -S RIPE
+  register: ipv4_output
+  changed_when: false
+
+- name: Generate IPv6 prefix list using bgpq4
+  command: bgpq4 -Al FPNET4 -s AS214223 -6 -S RIPE
+  register: ipv6_output
+  changed_when: false
+
+- name: Write IPv4 prefix-list config to temp file
+  template:
+    src: ipv4_prefix_list.conf.j2
+    dest: /tmp/frr_ipv4.conf
+    mode: '0644'
+
+- name: Write IPv6 prefix-list config to temp file
+  template:
+    src: ipv6_prefix_list.conf.j2
+    dest: /tmp/frr_ipv6.conf
+    mode: '0644'
+
+- name: Load IPv4 prefix list into FRR
+  shell: |
+    vtysh << EOF
+    configure terminal
+    {{ lookup('file', '/tmp/frr_ipv4.conf') }}
+    end
+    write
+    EOF
+
+- name: Load IPv6 prefix list into FRR
+  shell: |
+    vtysh << EOF
+    configure terminal
+    {{ lookup('file', '/tmp/frr_ipv6.conf') }}
+    end
+    write
+    EOF
